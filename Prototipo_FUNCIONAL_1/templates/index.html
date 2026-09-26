@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Monitor de red</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+</head>
+<body>
+    <main class="contenedor">
+        <header class="encabezado">
+            <div>
+                <p class="eyebrow">Sistema de monitoreo</p>
+                <h1>Dispositivos en red</h1>
+                <p class="descripcion">Detección de equipos conectados a la red local.</p>
+            </div>
+            <span class="estado-servicio"><span></span> Monitor activo</span>
+        </header>
+
+        <section class="panel resumen" aria-label="Resumen de escaneo">
+            <div>
+                <p class="etiqueta">Red objetivo</p>
+                <strong>{{ red_objetivo }}</strong>
+            </div>
+            <div>
+                <p class="etiqueta">Último escaneo</p>
+                <strong>{{ fecha_escaneo }}</strong>
+            </div>
+            <div>
+                <p class="etiqueta">Equipos detectados</p>
+                <strong class="numero">{{ dispositivos|length }}</strong>
+            </div>
+            <a class="boton" href="{{ url_for('inicio') }}">Actualizar escaneo</a>
+        </section>
+
+        {% if error %}
+        <section class="alerta" role="alert">
+            <strong>No fue posible completar el escaneo.</strong>
+            <span>{{ error }}</span>
+        </section>
+        {% endif %}
+
+        <section class="panel resultados">
+            <div class="titulo-seccion">
+                <div>
+                    <h2>Resultados</h2>
+                    <p>Los dispositivos se clasifican según la lista blanca configurada.</p>
+                </div>
+                {% if escaneo_realizado %}<span class="insignia">Escaneo completado</span>{% endif %}
+            </div>
+
+            {% if dispositivos %}
+            <div class="tabla-contenedor">
+                <table>
+                    <thead>
+                        <tr><th>Dirección IP</th><th>Dirección MAC</th><th>Fabricante</th><th>Estado</th></tr>
+                    </thead>
+                    <tbody>
+                    {% for dispositivo in dispositivos %}
+                        <tr>
+                            <td>{{ dispositivo.ip }}</td>
+                            <td class="monoespaciado">{{ dispositivo.mac }}</td>
+                            <td>{{ dispositivo.fabricante }}</td>
+                            <td><span class="estado {{ 'autorizado' if dispositivo.estado == 'AUTORIZADO' else 'no-autorizado' }}">{{ dispositivo.estado }}</span></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% elif not error %}
+            <div class="vacio">
+                <div class="icono">⌁</div>
+                <h3>No se encontraron dispositivos</h3>
+                <p>Verifica que la red objetivo coincida con tu red local y vuelve a escanear.</p>
+            </div>
+            {% endif %}
+        </section>
+
+        <p class="nota">Para detectar equipos, el servidor debe ejecutarse con permisos de administrador.</p>
+    </main>
+</body>
+</html>
